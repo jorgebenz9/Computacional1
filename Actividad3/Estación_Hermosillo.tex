@@ -1,0 +1,190 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish,es-tabla]{babel}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb,latexsym,cancel}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\renewcommand{\baselinestretch}{1.5}
+\usepackage{epstopdf}
+\usepackage{subfigure}
+\usepackage{array}
+\usepackage{float}
+\usepackage{longtable}
+\newcolumntype{E}{>{$}c<{$}}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[R]{ }
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0.9pt}
+\renewcommand{\footrulewidth}{0.9pt}
+\usepackage{url}
+
+
+\begin{document}
+
+
+\title{Actividad 3\\ Introducción a la biblioteca Pandas de Python  }
+\author{
+ Jorge Benz Olguín Aguilar\\
+\small{División de Ciencias Exactas, Departamento de Física}\\
+\small{Universidad de Sonora}\\
+}
+\date{\small{\today}}
+\maketitle
+
+\section{Introducción}
+
+\noindent En Computación y Ciencia de datos, pandas es una biblioteca de software escrita como extensión de NumPy para manipulación y análisis de datos para el lenguaje de programación Python. En particular, ofrece estructuras de datos y operaciones para manipular tablas numéricas y series temporales. Es un software libre distribuido bajo la licencia BSD versión tres cláusulas. El de la biblioteca deriva del término "datos de panel", término de econometría que designa datos que combinan una dimensión temporal con otra dimensión transversal.\cite{1}
+
+\section{Estación Hermosillo}
+
+\noindent Para la práctica número tres utilizamos los datos de la estación de Hermosillo del servicio meteorológico nacional. Descargamos los datos en archivo tipo txt para su posterior manipulación con el entorno de programación Jupyter. Desde la estación de Jupyter llamamos al archivo utilizando la función pd.read\_csv(), como lo podemos ver a continuación
+
+\begin{verbatim}
+data = pd.read_csv("Datos_Hermosillo_editado.txt"
+,sep="\s+",skipfooter=1,skiprows=1,engine='python'
+,names=['Fecha', 'Precip', 'Evap', 'Tmax', 'Tmin'])
+    
+\end{verbatim}
+
+\noindent En la tabla \ref{tabla:funciones} podemos ver un resumen de las funciones y métodos utilizados para realizar la actividad 3, algunos son propios de python y otros de las bibliotecas de pandas y numpy. No lo mencionamos antes, pero, estas bibliotecas tienen que ser llamadas antes de trabajar con ellas. Lo haremos de la siguiente manera
+
+\begin{verbatim}
+import pandas as pd
+import numpy as np
+\end{verbatim}
+
+\noindent Vamos a utilizar las funciones y métodos mencionados en la la tabla \ref{tabla:funciones} para analizar los datos, podremos obtener información como: cuales son los meses más lluviosos, cuales son los más fríos o los mas cálidos, años mas secos y años más húmedos, etc. 
+
+¿Cómo le podrás determinar cuáles son los meses más lluviosos?
+
+\noindent Cuando se bajaron los datos estos estaban organizados en cinco columnas y una de ellas nos proporcionaba la fecha de cada medición; día, mes y año. Esto nos llevo a tener que crear dos columnas nuevas, una de ellas sería para los meses y la otra para los años. Además los datos no tenían asignado su correspondiente tipo: enteros, flotante, etc. 
+por lo que tuvimos que asignarle un valor numérico a las columnas correspondientes.
+
+\begin{verbatim}
+# Crear columnas con Año y Mes extraídos de la fecha 
+data['Año'] = data['NFecha'].dt.year
+data['Mes'] = data['NFecha'].dt.month
+data.head()
+\end{verbatim}
+
+\begin{verbatim}
+#Cambiamos el tipo de variable de las columnas a flotante
+data[['Precip','Evap','Tmax','Tmin']] = data[['Precip','Evap','Tmax','Tmin']] \
+.apply(pd.to_numeric, errors='coerce')
+\end{verbatim}
+
+\noindent Determinar que meses son los mas lluviosos de una colección de mediciones lo podríamos determinar de dos formas: la primera seria hacerlo mes por mes, lo que significaría mucho mas trabajo, esto es mas código; la segunda, utilizando un loop que recorra todos los meses, cuatro o cinco lineas de código serian suficiente.
+
+\begin{verbatim}
+#utilizando un loop
+total=0.0
+for i in range(12):
+PrecipMensual = data['Precip'][data['Mes']==[i+1]].sum()/NumA
+total=total+PrecipMensual
+print("Mes", i+1,":", np.round(PrecipMensual,decimals=2), "mm", ", Acumulada:", 
+np.round(total, decimals=2), "mm")
+\end{verbatim}
+
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|{5cm} | p{10cm}|}
+\hline
+Función & Acción \\
+\hline \hline
+data.head() & Nos permite ver los primeros cinco renglones de nuestro archivo de datos\\
+\hline
+data.tail() & Muestra los últimos cinco renglones del archivo de datos \\
+\hline
+data.dtypes & Nos permite conocer con que tipo de variables estamos trabajando: enteros, flotante, etc\\
+\hline
+data.mean() & Saca el promedio de las columnas del archivo \\
+\hline
+data.std() & Saca la desviación estándar de cada una de las columnas del archivo\\
+\hline
+data.median() & Nos permite obtener la mediana de las columnas del archivo\\ 
+\hline
+data.max() & Nos regresa el valor mas grande de cada columna\\
+\hline
+data.min() & Nos retorna el valor mas pequeño de cada una de las columnas del archivo\\
+\hline
+data.describe() & Obtenemos un resumen estadístico del archivo por columna: máximo, mínimo, desviación estándar, percentil(25,50 y 75), promedio y una cuanta de los elementos de la columna\\
+\hline
+len() & Regresa el número de elementos en una lista\\
+\hline
+unique() & Solo toma en cuenta los elementos no repetidos de una lista\\
+\hline
+sum() & suma todos los elementos de una lista; en nuestro caso, una columna\\
+\hline
+np.round() & Nos sirve para redondear los decimales de los elementos de una matriz\\
+\hline
+range() & Utilizando los parámetros del método establecemos un rango de actuación\\
+\hline
+count() & Método que regresa el número de veces que aparece una subcadena en una cadena dada\\
+\hline
+drop() & remueve filas y columnas\\
+\hline
+apply() & Aplica una funcion a cada columna y fila\\
+\hline
+
+\end{tabular}
+\caption{Funciones y métodos básicos}
+\label{tabla:funciones}
+\end{table}
+
+¿Cuáles son los meses más fríos y cuáles son los más cálidos?
+
+\noindent De la misma forma que lo hicimos para los meses más lluviosos lo hacemos para los meses más fríos y más cálidos, esto es, utilizando un loop. El loop recorre los meses y todos los datos de la columna temperatura mínima o máxima, los datos son extraídos para el correspondiente mes, sumados y divididos entre el numero de datos encontrados.
+
+\begin{verbatim}
+# Para calcular los meses más frios y mas calidos utilizamos dos loops
+
+for i in range(12):
+TminPromMensual = data[data['Mes']==i+1]['Tmin'].sum()
+/data[data['Mes'] ==i+1]['Tmin'].count()
+print("Tmin Mes", i+1,":", 
+np.round(TminPromMensual, decimals=2), "ºC")
+  
+print(" ")
+    
+for i in range(12):
+TmaxPromMensual = data[data['Mes']==i+1]['Tmax'].sum()
+/data[data['Mes'] ==i+1]['Tmax'].count()
+print("Tmax Mes", i+1,":", 
+np.round(TmaxPromMensual, decimals=2), "ºC")
+\end{verbatim}
+
+
+¿Cómo ha venido siendo la temperatura mensual promedio en los últimos 20 años? 
+
+\noindent Se saco un promedio entre las temperaturas máximas y mínimas de los últimos 20 años, por mes. Todo dentro de un loop, lo cual como ya lo mencionamos nos evita un poco mas de trabajo.
+
+\begin{verbatim}
+# la temperatura mensual promedio en los últimos 20 años 
+for i in range(12):
+TminPromMensual = data[data['Mes']==i+1]['Tmin'].sum()/data[data['Mes'] ==i+1]['Tmin'].count()
+TmaxPromMensual = data[data['Mes']==i+1]['Tmax'].sum()/data[data['Mes'] ==i+1]['Tmax'].count()
+TpromMensual = (TminPromMensual+TmaxPromMensual)*(1/2)
+\end{verbatim}
+
+Estas son solo algunos ejemplos de lo que podemos hacer con un archivo de datos. Las herramientas de análisis que maneja la biblioteca pandas así como numpy son de las mejores que se pueden encontrar en forma gratuita e incluso dentro de las de paga.
+
+
+
+\begin{thebibliography}{0}
+
+
+\bibitem {1}Pandas. (2018, 27 de noviembre). Wikipedia, La enciclopedia libre. Fecha de consulta: 04:32, febrero 19, 2019  
+
+
+
+
+\end{thebibliography}
+
+\end{document}
+
